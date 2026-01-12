@@ -9,7 +9,7 @@ services:
     image: node:20-alpine
     working_dir: /app
     volumes:
-      - ./app:/app
+      - .:/app
     environment:
       - TARGET_URL=https://google.com
       - FPS=1
