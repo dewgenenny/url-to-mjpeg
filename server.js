@@ -21,6 +21,11 @@ let browser, page;
 
 async function init() {
   browser = await puppeteer.connect({ browserWSEndpoint: BROWSER_WS });
+  browser.on('disconnected', () => {
+    console.error("Browser disconnected! Exiting...");
+    process.exit(1);
+  });
+
   page = await browser.newPage();
   await page.setViewport({ width: WIDTH, height: HEIGHT, deviceScaleFactor: DEVICE_SCALE_FACTOR });
 
@@ -38,6 +43,19 @@ async function init() {
 }
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
+
+app.get("/", (_req, res) => {
+  res.send(`
+    <html>
+      <head><title>MJPEG Stream</title></head>
+      <body>
+        <h1>MJPEG Stream</h1>
+        <img src="/stream.mjpg" style="width: 100%; max-width: 1280px;" />
+      </body>
+    </html>
+  `);
+});
+
 
 app.get("/stream.mjpg", async (req, res) => {
   if (!page) return res.status(503).send("not ready");
@@ -64,7 +82,10 @@ app.get("/stream.mjpg", async (req, res) => {
       res.write(`Content-Length: ${jpeg.length}\r\n\r\n`);
       res.write(jpeg);
       res.write("\r\n");
-    } catch { /* keep going */ }
+    } catch (err) {
+      console.error("Screenshot error:", err.message);
+    }
+
 
     await new Promise(r => setTimeout(r, intervalMs));
   }

@@ -3,6 +3,8 @@ services:
     image: browserless/chrome:latest
     environment:
       - TOKEN=secret
+      - TIMEOUT=86400000 # 24 hours
+      - CONNECTION_TIMEOUT=86400000 # 24 hours
     restart: unless-stopped
 
   mjpeg:
@@ -11,7 +13,7 @@ services:
     volumes:
       - .:/app
     environment:
-      - TARGET_URL=https://google.com
+      - TARGET_URL=https://sennen-cove.com
       - FPS=1
       - WIDTH=1280
       - HEIGHT=720
