@@ -1,0 +1,30 @@
+services:
+  browser:
+    image: browserless/chrome:latest
+    environment:
+      - TOKEN=secret
+    restart: unless-stopped
+
+  mjpeg:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./app:/app
+    environment:
+      - TARGET_URL=https://google.com
+      - FPS=1
+      - WIDTH=1280
+      - HEIGHT=720
+      - QUALITY=70
+      - DEVICE_SCALE_FACTOR=1
+      - WAIT_UNTIL=networkidle2
+      - SETTLE_MS=2000
+      - RELOAD_EVERY_SEC=1800
+      - BROWSER_WS=ws://browser:3000?token=secret
+      - PORT=8080
+    command: sh -c "npm i --omit=dev express puppeteer-core && node server.js"
+    ports:
+      - "8087:8080"
+    depends_on:
+      - browser
+    restart: unless-stopped
